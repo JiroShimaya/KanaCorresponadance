@@ -1,40 +1,50 @@
+<!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KanaCorrespondance</title>
+  </head>
   <body>
-    <div><input id="input"></div>
+    <div><input id="input" placeholder value="解析したい文章"></div>
     <div><button id="button" disabled>ロード中</button></div>
     <div id="result"></div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="path/to/kuromoji/build/kuromoji.js"></script>
-  <script src="path/to/allocate.js"></script>
+  <script src="js/kuromoji/build/kuromoji.js"></script>
+  <script src="js/kana_correspondance.js"></script>
   <script>
-    let build = async function(kuromoji_path, kanjidict_path){
-      let TOKENIZER = await new Promise((reslove,reject)=>{
-        kuromoji.builder({dicPath:KUROMOJI_PATH_}).build(function(err, tokenizer){
-          if(err) { console.log(err);reject("error:",err); }
-          resolve(tokenizer);
-        });
+  let KUROMOJI_PATH = "js/kuromoji/dict";
+  let KANJIDICT_PATH = "data/kanjiyomi.json";
+  (async function(kuromoji_path, kanjidict_path){
+	let input = $("#input");
+	let button = $("#button");  
+	let result = $("#result");
+	
+    let TOKENIZER = await new Promise((resolve,reject)=>{
+      kuromoji.builder({dicPath:kuromoji_path}).build(function(err, tokenizer){
+        if(err) { console.log(err);reject("error:",err); }
+        resolve(tokenizer);
       });
-      let KANJI_DICT = await new Promise((resolve, reject)=>{
-        $.getJSON(kanjidict_path, function(json){ reslove(json) });
-      });
+    });
+    let KANJI_DICT = await new Promise((resolve, reject)=>{
+      $.getJSON(kanjidict_path, function(json){ resolve(json) });
+    });
 
-      let button = $("#button");
-      button.prop("disabled",false);
-      button.click(()=>{
-        let input = $("#input");
-        let text = input.val();
-        if(text == "") return;
-        
-        let resultdiv = $("#result");
-        let result = getCharCorrespondance(text, TOKENIZER, KANJI_DICT);
-        let result_text = JSON.stringify(result);
-        resultdiv.html(result_text);
+    
+    button.prop("disabled",false);
+    button.html("実行");
+    
+    button.click(()=>{
+      let text = input.val();
+      if(text == "") return;
+          
+      let result_json = getCharCorrespondance(text, TOKENIZER, KANJI_DICT);
+      let result_text = JSON.stringify(result_json);
+      result.html(result_text);
 
-        input.val("");
-
-      });
-      
-    let loadKanjiDict = new Promise((resolve
+      input.val("");
+    });
+  })(KUROMOJI_PATH, KANJIDICT_PATH);
   </script>
 </html>
