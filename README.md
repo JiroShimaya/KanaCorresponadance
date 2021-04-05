@@ -1,0 +1,2 @@
+# KanaCorresponadance
+読みがなと元文の対応を見つける関数
